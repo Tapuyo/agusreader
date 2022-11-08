@@ -1,0 +1,118 @@
+{
+  "project_info": {
+    "project_number": "734439168307",
+    "project_id": "agus-9b8da",
+    "storage_bucket": "agus-9b8da.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:734439168307:android:29ac8331f11ebaef450646",
+        "android_client_info": {
+          "package_name": "com.agus.agus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "734439168307-762s5mt0i1mn65c4tlfqjkuiahmgvbci.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEpyW9HdHeTmAJ8P0Zj42k-SzEubuncEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "734439168307-762s5mt0i1mn65c4tlfqjkuiahmgvbci.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "734439168307-0s4j5mg9mclobendqsq2nfeptok07gvl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.john.sakloloresident"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:734439168307:android:221d589c2f96e423450646",
+        "android_client_info": {
+          "package_name": "com.agus.reader"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "734439168307-762s5mt0i1mn65c4tlfqjkuiahmgvbci.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEpyW9HdHeTmAJ8P0Zj42k-SzEubuncEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "734439168307-762s5mt0i1mn65c4tlfqjkuiahmgvbci.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "734439168307-0s4j5mg9mclobendqsq2nfeptok07gvl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.john.sakloloresident"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:734439168307:android:fb567af698c5d4f9450646",
+        "android_client_info": {
+          "package_name": "com.agus.reader.agus_reader"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "734439168307-762s5mt0i1mn65c4tlfqjkuiahmgvbci.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEpyW9HdHeTmAJ8P0Zj42k-SzEubuncEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "734439168307-762s5mt0i1mn65c4tlfqjkuiahmgvbci.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "734439168307-0s4j5mg9mclobendqsq2nfeptok07gvl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.john.sakloloresident"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
