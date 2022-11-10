@@ -293,6 +293,8 @@ class _OffilineReadingState extends State<OffilineReading> {
     );
   }
 
+  
+
   Future<void> _displayReadingDialog(BuildContext context, String id) async {
    return showDialog(
        context: context,
@@ -309,9 +311,7 @@ class _OffilineReadingState extends State<OffilineReading> {
              decoration: InputDecoration(hintText: "Input reading"),
            ),
            actions: <Widget>[
-             FlatButton(
-               color: Colors.green,
-               textColor: Colors.white,
+             TextButton(
                child: const Text('Save'),
                onPressed: () {
                  setState(() {
@@ -324,7 +324,7 @@ class _OffilineReadingState extends State<OffilineReading> {
            ],
          );
        });
- }
+  }
 
    Future<int> UpdateItemBill(String id) async {
     String readVal = _textFieldController.text;

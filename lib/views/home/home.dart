@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import '../../models/billing_models.dart';
 import '../../models/members_billing_model.dart';
 import '../../services/sqlite_service.dart';
+import '../billing/bill.dart';
 
 class MyHomePage extends StatefulWidget {
   _BillingPayDialog createState() => _BillingPayDialog();
@@ -30,7 +31,7 @@ class _BillingPayDialog extends State<MyHomePage>
   late AnimationController _animationController;
   bool offline = true;
   bool showDownLoadinBtn = true;
-  
+  String menuChoose = 'offlineReading';
 
   @override
   void initState() {
@@ -95,8 +96,10 @@ class _BillingPayDialog extends State<MyHomePage>
                             GestureDetector(
                                 onTap: () {
                                   setState(() {
+                                    menuChoose = 'offlineReading';
                                     offline = !offline;
                                   });
+                                  _toggleAnimation();
                                 },
                                 child: Text(
                                     offline ? 'Online Mode' : 'Offline Mode',
@@ -106,9 +109,11 @@ class _BillingPayDialog extends State<MyHomePage>
                             ),
                             GestureDetector(
                               onTap: ()async{
-                                MembersBilling bills = MembersBilling('1Zizfq8XMICrd4XeCPAJ','billMemId','name','reading','status','areaid','deateread','12','');
-    final result = await SqliteService.downloadReading(bills);
-    print(result);
+                                  setState(() {
+                                    showDownLoadinBtn = false;
+                                    menuChoose = 'billing';
+                                  });
+                                  _toggleAnimation();
                               },
                               child: Text('Reading',
                                   style: BluekTextStyleHeadline5white),
@@ -153,9 +158,9 @@ class _BillingPayDialog extends State<MyHomePage>
                     backgroundColor: Colors.white,
                     body: Stack(
                       children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height,
-                          width: MediaQuery.of(context).size.width,
+                        Expanded(
+                          // height: MediaQuery.of(context).size.height,
+                          // width: MediaQuery.of(context).size.width,
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(20, 40, 20, 0),
                             child: Column(
@@ -188,7 +193,14 @@ class _BillingPayDialog extends State<MyHomePage>
                                       ),
                                     ],
                                   ),
-                                  OffilineReading(billID: docID,),
+                                  if(menuChoose == 'offlineReading')...[
+                                    OffilineReading(billID: docID,),
+                                  ]else if(menuChoose == 'billing')...[
+                                    BillingPage()
+                                  ]else...[
+                                    OffilineReading(billID: docID,),
+                                  ]
+                                  
                                 ]),
                           ),
                         ),
@@ -322,7 +334,7 @@ class _BillingPayDialog extends State<MyHomePage>
                   itemBuilder: (context, index) {
                     checkBillingExist(snapshot.data[index].billingID);
                     return Visibility(
-                      visible: showDownLoadinBtn,
+                      visible: menuChoose == 'offlineReading' ? showDownLoadinBtn:false,
                       child: MenuButton(
                           isSelect: true,
                           onPressed: () async{
