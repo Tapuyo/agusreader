@@ -29,13 +29,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.3"
-  blue_thermal_printer:
-    dependency: "direct main"
-    description:
-      name: blue_thermal_printer
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.2.3"
   bluetooth_print:
     dependency: "direct main"
     description:
