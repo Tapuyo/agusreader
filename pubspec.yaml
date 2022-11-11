@@ -54,6 +54,7 @@ dependencies:
 
   #printing
   bluetooth_print: ^4.3.0
+  connectivity_plus: ^2.3.9
   
 
 dev_dependencies:

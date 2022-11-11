@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import '../../../models/members_billing_model.dart';
 import '../../../provider/billing_provider.dart';
 import '../../../utils/custom_menu_button.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class OffilineReading extends StatefulWidget {
   final String billID;
@@ -25,6 +26,7 @@ class OffilineReading extends StatefulWidget {
 }
 
 class _OffilineReadingState extends State<OffilineReading> {
+  
   late SqliteService _sqliteService;
   List<Billing> _bills = [];
   List<MembersBilling> billsOffline = [];
@@ -40,6 +42,9 @@ List<MembersBilling> _foundUsers = [];
   String? valDropdown;
   String? valDropdowna;
   bool value = false;
+  bool all = false;
+
+   ConnectivityResult? _connectivityResult;
   @override
   void initState() {
     super.initState();
@@ -47,7 +52,12 @@ List<MembersBilling> _foundUsers = [];
     getList(widget.billID);
     getArea();
   }
-
+Future<void> _checkConnectivityState() async {
+    final ConnectivityResult result = await Connectivity().checkConnectivity();
+    setState(() {
+      _connectivityResult = result;
+    });
+  }
   getList(String billID) async {
     choosMenu = billID;
     billsOffline.clear();
@@ -56,8 +66,14 @@ List<MembersBilling> _foundUsers = [];
   }
 
   getArea() async {
+   await _checkConnectivityState();
+    if(_connectivityResult == ConnectivityResult.wifi || _connectivityResult == ConnectivityResult.mobile ){
+      print('Connected');
     _areas.clear();
     _areas = await SqliteService.getAreas();
+    }else{
+      print('Please check your connection');
+    }
   }
 
   getMenuBills() async {
@@ -261,7 +277,6 @@ List<MembersBilling> _foundUsers = [];
   }
 
   void onSearchTextChanged(String text) async {
-     _foundUsers = billsOffline;
     List<MembersBilling> results = [];
     if (text.isEmpty) {
         results = _foundUsers;
@@ -275,11 +290,38 @@ List<MembersBilling> _foundUsers = [];
       billsOffline = results;
     });
   }
-   void onSearchBrgyChanged(String text) async {
-    _foundUsers = billsOffline;
+  void onStatusChanged(bool text) async {
     List<MembersBilling> results = [];
+    if (text == false) {
+        results = _foundUsers
+          .where((user) =>
+              user.reading.toString() == '0')
+          .toList();
+    } else {
+        results = _foundUsers
+          .where((user) =>
+              user.reading.toString() != '0')
+          .toList();
+    }
+    setState(() {
+      billsOffline = results;
+    });
+  }
+  void onAllChanged() async {
+    List<MembersBilling> results = [];
+        results = _foundUsers;
+    setState(() {
+      billsOffline = results;
+    });
+  }
+   void onSearchBrgyChanged(String text) async {
+    List<MembersBilling> results = [];
+    print(text);
+    print(_foundUsers);
     if(billsOffline.isEmpty){
-    if (text.isEmpty) {
+    print('I am empty');
+    }else{
+      if (text.isEmpty) {
         results = _foundUsers;
     } else {
         results = _foundUsers
@@ -287,8 +329,6 @@ List<MembersBilling> _foundUsers = [];
               user.areaid.toLowerCase().contains(text.toLowerCase()))
           .toList();
     }
-    }else{
-      const AlertDialog(title: Text('Please Select Month of Bill'), );
     }
     setState(() {
       billsOffline = results;
@@ -465,15 +505,12 @@ List<MembersBilling> _foundUsers = [];
                                         .toList(),
                                     onChanged: (value) {
                                       newsetState(() {
-                                        if(billsOffline.isEmpty){
-                                         _dialogBuilder;
-                                          }else{
+                                        print(value);
                                         onSearchBrgyChanged(value.toString());
                                         valDropdowna = value.toString();
                                         setState(() {
                                         valDropdowna = value.toString();
                                       });
-                                          }
                                       });
                                     },
                                   ),
@@ -584,14 +621,32 @@ List<MembersBilling> _foundUsers = [];
                               value: value,
                               onChanged: (bool? newvalue) {
                                  newsetState(() {
-                                  value = newvalue!;
+                                  onStatusChanged(newvalue!);
+                                  value = newvalue;
+                                  all = false;
+
                                 });
                               },
-                            ), //Checkbox
-                            const SizedBox(width: 2), //SizedBox
+                            ), //Checkbox//SizedBox
                              Text( value ?
                               'Read ' : 'Unread',
-                              style: TextStyle(fontSize: 17.0),
+                              style: const TextStyle(fontSize: 17.0),
+                            ), //Text
+                           const SizedBox( width: 3,),
+                            Checkbox(
+                              value: all,
+                              onChanged: (bool? newvalueme) {
+                                 newsetState(() {
+                                  onAllChanged();
+                                  all = newvalueme!;
+                                  value = false;
+
+
+                                });
+                              },
+                            ), //Checkbox//SizedBox
+                            const Text( 'All',
+                              style:  TextStyle(fontSize: 17.0),
                             ), //Text
                           ], //<Widget>[]
                         ),
