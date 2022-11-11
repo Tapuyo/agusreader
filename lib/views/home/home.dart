@@ -1,14 +1,13 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:agus_reader/constants/constant.dart';
+import 'package:agus_reader/login/auth.dart';
 import 'package:agus_reader/models/area_model.dart';
-import 'package:agus_reader/provider/billing_provider.dart';
+import 'package:agus_reader/models/user_model.dart';
 import 'package:agus_reader/utils/custom_menu_button.dart';
-import 'package:agus_reader/utils/custom_menu_label_button.dart';
 import 'package:agus_reader/views/home/offline_reading/offline_reading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/billing_models.dart';
@@ -27,6 +26,7 @@ class _BillingPayDialog extends State<MyHomePage>
   List<Area> areas = [];
   Future? fbills;
   String docID = '';
+  String areaID = '';
   late AnimationController _animationController;
   bool offline = true;
   bool showDownLoadinBtn = true;
@@ -71,154 +71,158 @@ class _BillingPayDialog extends State<MyHomePage>
   Widget build(BuildContext context) {
     final rightSlide = MediaQuery.of(context).size.width * -.5;
     return AnimatedBuilder(
-        animation: _animationController,
-        builder: (context, child) {
-          double slide = rightSlide * _animationController.value;
-          double scale = 1 - (_animationController.value * 0.3);
-          return Stack(
-            children: [
-              // Works as Drawer
-              GestureDetector(
-                onTap: () {
-                  _toggleAnimation();
-                },
-                child: Scaffold(
-                  backgroundColor: kColorBlue,
-                  body: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 200, 30, 0),
-                    child: SizedBox(
-                        width: MediaQuery.of(context).size.width,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          // ignore: prefer_const_literals_to_create_immutables
-                          children: [
-                            GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    offline = !offline;
-                                  });
-                                },
-                                child: Text(
-                                    offline ? 'Online Mode' : 'Offline Mode',
-                                    style: BluekTextStyleHeadline5white)),
-                            SizedBox(
-                              height: 30,
-                            ),
-                            GestureDetector(
-                              onTap: ()async{
-                                MembersBilling bills = MembersBilling('1Zizfq8XMICrd4XeCPAJ','billMemId','name','reading','status','areaid','deateread','12','');
-    final result = await SqliteService.downloadReading(bills);
-    print(result);
-                              },
-                              child: Text('Reading',
-                                  style: BluekTextStyleHeadline5white),
-                            ),
-                            SizedBox(
-                              height: 30,
-                            ),
-                            Text('Print Bills',
-                                style: BluekTextStyleHeadline5white),
-                            SizedBox(
-                              height: 30,
-                            ),
-                            Text('Settings',
-                                style: BluekTextStyleHeadline5white),
-                            SizedBox(
-                              height: 30,
-                            ),
-                            Text('Help?', style: BluekTextStyleHeadline5white),
-                          ],
-                        )),
-                  ),
-                ),
-              ),
+       animation: _animationController,
+       builder: (context, child) {
+         double slide = rightSlide * _animationController.value;
+         double scale = 1 - (_animationController.value * 0.3);
+         return Stack(
+           children: [
+             // Works as Drawer
+             GestureDetector(
+               onTap: () {
+                 _toggleAnimation();
+               },
+               child: Scaffold(
+                 backgroundColor: kColorBlue,
+                 body: Padding(
+                   padding: const EdgeInsets.fromLTRB(0, 200, 30, 0),
+                   child: SizedBox(
+                       width: MediaQuery.of(context).size.width,
+                       child: Column(
+                         crossAxisAlignment: CrossAxisAlignment.end,
+                         // ignore: prefer_const_literals_to_create_immutables
+                         children: [
+                           GestureDetector(
+                               onTap: () {
+                                 setState(() {
+                                   offline = !offline;
+                                 });
+                               },
+                               child: Text(
+                                   offline ? 'Online Mode' : 'Offline Mode',
+                                   style: BluekTextStyleHeadline5white)),
+                           SizedBox(
+                             height: 30,
+                           ),
+                           GestureDetector(
+                             onTap: ()async{
+                               MembersBilling bills = MembersBilling('1Zizfq8XMICrd4XeCPAJ','billMemId','name','reading','status','areaid','deateread','12','');
+        final result = await SqliteService.downloadReading(bills);
+        print(result);
+                             },
+                             child: Text('Reading',
+                                 style: BluekTextStyleHeadline5white),
+                           ),
+                           SizedBox(
+                             height: 30,
+                           ),
+                           GestureDetector(
+                             onTap: ()async{
+                               MembersBilling bills = MembersBilling('1Zizfq8XMICrd4XeCPAJ','billMemId','name','reading','status','areaid','deateread','12','');
+        final result = await SqliteService.downloadReading(bills);
+        print(result);
+                             },
+                             child: Text('Print Bills',
+                                 style: BluekTextStyleHeadline5white),
+                           ),
+                           SizedBox(
+                             height: 30,
+                           ),
+                           Text('Settings',
+                               style: BluekTextStyleHeadline5white),
+                           SizedBox(
+                             height: 30,
+                           ),
+                           Text('Help?', style: BluekTextStyleHeadline5white),
+                         ],
+                       )),
+                 ),
+               ),
+             ),
 
-              Transform(
-                transform: Matrix4.identity()
-                  ..translate(slide)
-                  ..scale(scale),
-                alignment: Alignment.center,
-                child: Container(
-                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(10.0),
-                        topLeft: Radius.circular(10.0),
-                        bottomRight: Radius.circular(10.0)
-                        
-                        ),
-                        
-                    color: Colors.white,
-                  ),
-                  child: Scaffold(
-                    backgroundColor: Colors.white,
-                    body: Stack(
-                      children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height,
-                          width: MediaQuery.of(context).size.width,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 40, 20, 0),
-                            child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        // ignore: prefer_const_literals_to_create_immutables
-                                        children: [
-                                          Text(
-                                            'Welcome',
-                                            style: kTextStyleHeadline5,
-                                          ),
-                                          SizedBox(
-                                            height: 12,
-                                          ),
-                                          Text('John', style: kTextStyleHeadline4)
-                                        ],
-                                      ),
-                                      Spacer(),
-                                      IconButton(
-                                        onPressed: () => _toggleAnimation(),
-                                        icon: AnimatedIcon(
-                                          icon: AnimatedIcons.menu_close,
-                                          progress: _animationController,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  OffilineReading(billID: docID,),
-                                ]),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                              child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    if (offline) ...[
-                                      openBills(context),
-                                    ] else ...[
-                                      liveBilling(context)
-                                    ]
-                                  ]),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            ],
-          );
-        });
+             Transform(
+               transform: Matrix4.identity()
+                 ..translate(slide)
+                 ..scale(scale),
+               alignment: Alignment.center,
+               child: Container(
+                  decoration: BoxDecoration(
+                   borderRadius: BorderRadius.only(
+                       topRight: Radius.circular(10.0),
+                       topLeft: Radius.circular(10.0),
+                       bottomRight: Radius.circular(10.0)
+                       
+                       ),
+                       
+                   color: Colors.white,
+                 ),
+                 child: Scaffold(
+                   backgroundColor: Colors.white,
+                   body: Stack(
+                     children: [
+                       SizedBox(
+                         height: MediaQuery.of(context).size.height,
+                         width: MediaQuery.of(context).size.width,
+                         child: Padding(
+                           padding: const EdgeInsets.fromLTRB(20, 40, 20, 0),
+                           child: Column(
+                               mainAxisAlignment: MainAxisAlignment.start,
+                               children: [
+                                 Row(
+                                   children: [
+                                     Column(
+                                       crossAxisAlignment:
+                                           CrossAxisAlignment.start,
+                                       // ignore: prefer_const_literals_to_create_immutables
+                                       children: [
+                                         Text(
+                                           'Welcome',
+                                           style: kTextStyleHeadline5,
+                                         ),
+                                         Text('John', style: kTextStyleHeadline4)
+                                       ],
+                                     ),
+                                     Spacer(),
+                                     IconButton(
+                                       onPressed: () => _toggleAnimation(),
+                                       icon: AnimatedIcon(
+                                         icon: AnimatedIcons.menu_arrow,
+                                         progress: _animationController,
+                                       ),
+                                     ),
+                                   ],
+                                 ),
+                                 OffilineReading(billID: docID,),
+                               ]),
+                         ),
+                       ),
+                       Align(
+                         alignment: Alignment.bottomCenter,
+                         child: SizedBox(
+                           width: MediaQuery.of(context).size.width,
+                           child: Padding(
+                             padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                             child: Column(
+                                 mainAxisAlignment: MainAxisAlignment.end,
+                                 crossAxisAlignment: CrossAxisAlignment.center,
+                                 children: [
+                                   if (offline) ...[
+                                     openBills(context),
+                                   ] else ...[
+                                     liveBilling(context)
+                                   ]
+                                 ]),
+                           ),
+                         ),
+                       )
+                     ],
+                   ),
+                 ),
+               ),
+             )
+           ],
+         );
+       });
   }
 
   Future<List<Billing>> getBilling() async {
@@ -248,10 +252,11 @@ class _BillingPayDialog extends State<MyHomePage>
         .then((QuerySnapshot querySnapshot) => {
               querySnapshot.docs.forEach((doc) async {
                 debugPrint(doc.data().toString());
-
-                  Area areasS = Area( doc['code'], doc['date'],
+                 setState(() {
+                    areaID = doc.id;
+                  });
+                  await downloadAreas(doc.id,doc['code'],
                       doc['description'], doc['name'], doc['status']);
-                  areas.add(areasS);
                 })
               });
     return areas;
@@ -285,8 +290,8 @@ class _BillingPayDialog extends State<MyHomePage>
   //             })
   //           });
   // }
-  Future<int> downloadAreas(String code,date,description,name,status) async {
-    Area areas = Area(code,date,description,name,status);
+  Future<int> downloadAreas(String id, String code,String description,String name,String status) async {
+    Area areas = Area(id,code,description,name,status);
     print(bills.toString());
     final result = await SqliteService.downloadArea(areas);
   

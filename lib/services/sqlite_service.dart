@@ -14,6 +14,8 @@ class SqliteService {
       onCreate: (database, version) async {
          await database.execute( "CREATE TABLE Billing(id INTEGER PRIMARY KEY AUTOINCREMENT,  billingID TEXT, month TEXT, year TEXT, status TEXT, creator TEXT)",);
          await database.execute( "CREATE TABLE MembersBillings(id INTEGER PRIMARY KEY AUTOINCREMENT,  billingID TEXT, billMemId TEXT, name TEXT, reading TEXT, status TEXT, areaid TEXT, deateread TEXT, prev TEXT, connectionId TEXT)",);
+         await database.execute( "CREATE TABLE Areamap(id TEXT,code TEXT, description TEXT, name TEXT, status TEXT)",);
+
      },
      version: 1,
     );
@@ -30,17 +32,28 @@ class SqliteService {
       return false;
     }
   }
-  static Future<Database> initizateDbarea() async {
-    String path = await getDatabasesPath();
-    
-    return openDatabase(
-      join(path, 'database.db'),
-      onCreate: (database, version) async {
-         await database.execute( "CREATE TABLE Area(id INTEGER PRIMARY KEY AUTOINCREMENT,  code TEXT, date TEXT, descrption TEXT, name TEXT, status TEXT)",);
-       },
-     version: 1,
-    );
+   static Future<bool> checkAreaExist(String id) async {
+    final db = await initizateDb();
+    final List<Map<String, Object?>> queryResult = 
+      await db.query('Areamap',where: 'id = ?', whereArgs: [id]);
+
+    if(queryResult.isNotEmpty){
+      return true;
+    }else{
+      return false;
+    }
   }
+  // static Future<Database> initizateDbarea() async {
+  //   String path = await getDatabasesPath();
+    
+  //   return openDatabase(
+  //     join(path, 'database.db'),
+  //     onCreate: (database, version) async {
+  //        await database.execute( "CREATE TABLE Area(id INTEGER PRIMARY KEY AUTOINCREMENT,  code TEXT, description TEXT, name TEXT, status TEXT)",);
+  //      },
+  //    version: 1,
+  //   );
+  // }
 
   static Future<List<MembersBilling>> getMemberBills(String billID) async {
     print(billID);
@@ -50,6 +63,14 @@ class SqliteService {
 
     print(queryResult.length);
     return queryResult.map((e) => MembersBilling.fromMap(e)).toList();
+  }
+   static Future<List<Area>> getAreas() async {
+    final db = await initizateDb();
+    final List<Map<String, Object?>> queryResult = 
+     await db.query('Areamap',);
+
+    print(queryResult.length);
+    return queryResult.map((e) => Area.fromMap(e)).toList();
   }
     
 
@@ -79,10 +100,16 @@ class SqliteService {
     print('download result $id');
     return id;
    }
+   
 static Future<int> downloadArea(Area areamap) async {
-    final Database db = await initizateDbarea();
+    final Database db = await initizateDb();
+    try {
+       await db.delete("Areamap",);
+    } catch (err) {
+      debugPrint("Something went wrong when deleting an item: $err");
+    }
     final id = await db.insert(
-      'Area', areamap.toMap(), 
+      'Areamap', areamap.toMap(), 
       conflictAlgorithm: ConflictAlgorithm.replace);
     print('download result $id');
     return id;

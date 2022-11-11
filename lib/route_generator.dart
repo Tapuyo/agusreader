@@ -1,4 +1,5 @@
 
+import 'package:agus_reader/login/loginpage.dart';
 import 'package:agus_reader/sample/sample.dart';
 import 'package:agus_reader/views/home/home.dart';
 import 'package:agus_reader/routes.dart';
@@ -15,7 +16,7 @@ class RouteGenerator {
         return CupertinoPageRoute(builder: (_) => const SplashScreen());
       case Routes.home:
         return CupertinoPageRoute(builder: (_) => const MyHomePage());
-        // return CupertinoPageRoute(builder: (_) =>  OnlineReading());
+        // return CupertinoPageRoute(builder: (_) =>  const SignIn());
 
       default:
         return _errorRoute();

@@ -15,7 +15,10 @@ import '../../../utils/custom_menu_button.dart';
 
 class OffilineReading extends StatefulWidget {
   final String billID;
-  const OffilineReading({Key? key, required this.billID}) : super(key: key);
+  const OffilineReading({
+    Key? key,
+    required this.billID,
+  }) : super(key: key);
 
   @override
   State<OffilineReading> createState() => _OffilineReadingState();
@@ -26,24 +29,35 @@ class _OffilineReadingState extends State<OffilineReading> {
   List<Billing> _bills = [];
   List<MembersBilling> billsOffline = [];
   List<Area> _areas = [];
+List<MembersBilling> _foundUsers = [];
   String choosMenu = '';
+  String areaCh = '';
   String readingText = '';
-  TextEditingController _textFieldController =  TextEditingController();
+  TextEditingController _textFieldController = TextEditingController();
+    TextEditingController _nameFieldController = TextEditingController();
+
 
   String? valDropdown;
   String? valDropdowna;
-
+  bool value = false;
   @override
   void initState() {
     super.initState();
     getMenuBills();
     getList(widget.billID);
+    getArea();
   }
 
   getList(String billID) async {
     choosMenu = billID;
     billsOffline.clear();
     billsOffline = await SqliteService.getMemberBills(choosMenu);
+    _foundUsers = billsOffline;
+  }
+
+  getArea() async {
+    _areas.clear();
+    _areas = await SqliteService.getAreas();
   }
 
   getMenuBills() async {
@@ -55,32 +69,26 @@ class _OffilineReadingState extends State<OffilineReading> {
 
   uploadBills(String billID) async {
     final res = await SqliteService.getMemberBills(billID);
-    for(var bill in res){
-        var totalC = double.parse(bill.reading) - double.parse(bill.prev);
-        updateReadingMember(bill.billMemId, bill.reading, totalC, bill.connectionId);
+    for (var bill in res) {
+      var totalC = double.parse(bill.reading) - double.parse(bill.prev);
+      updateReadingMember(
+          bill.billMemId, bill.reading, totalC, bill.connectionId);
     }
   }
 
-  Future<void> updateReadingMember(
-      String id,
-      String currentReading,
-      double totalCubic,
-      String connectionId) async {
-      double totalPrice = await getTotalBill(connectionId, totalCubic);
-      FirebaseFirestore.instance
-          .collection('membersBilling')
-          .doc(id)
-          .update({
-        'currentReading': double.parse(currentReading),
-        'totalCubic': totalCubic,
-        'billingPrice': totalPrice,
-        'flatRatePrice': 0,
-        'flatRate': '',
-        'dateRead': DateTime.now()
-      }).then((value) async{
-          await SqliteService.updateBillingStatus(id);
-      });
-    
+  Future<void> updateReadingMember(String id, String currentReading,
+      double totalCubic, String connectionId) async {
+    double totalPrice = await getTotalBill(connectionId, totalCubic);
+    FirebaseFirestore.instance.collection('membersBilling').doc(id).update({
+      'currentReading': double.parse(currentReading),
+      'totalCubic': totalCubic,
+      'billingPrice': totalPrice,
+      'flatRatePrice': 0,
+      'flatRate': '',
+      'dateRead': DateTime.now()
+    }).then((value) async {
+      await SqliteService.updateBillingStatus(id);
+    });
   }
 
   Future<double> getTotalBill(String connectionId, double totalCubic) async {
@@ -104,48 +112,69 @@ class _OffilineReadingState extends State<OffilineReading> {
 
   @override
   Widget build(BuildContext context) {
-     BillingProvider provider = context.read<BillingProvider>();
-     if(provider.isRefresh){
+    BillingProvider provider = context.read<BillingProvider>();
+    if (provider.isRefresh) {
       getList(widget.billID);
       getMenuBills();
       provider.billRefresh();
-     }
+    }
     return SingleChildScrollView(
       child: Column(
         children: [
-          Text('Provider result: ${provider.isRefresh.toString()}'),
+          // Text('Provider result: ${provider.isRefresh.toString()}'),
           Container(
             child: Row(
               children: [
-                 dropMenu(),
-                IconButton(onPressed: (){
-                    uploadBills(choosMenu);
-                }, icon: const Icon(Icons.upload))
-                
+                dropMenu(),
               ],
             ),
           ),
-          const SizedBox(width: 10,),
-          Row(
-            children: const <Widget>[
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Name', style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18.0,
-                ),),
-              ),
-              SizedBox(width: 150,),
-              Text('Previous', style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18.0,
-                ),),
-                SizedBox(width: 15,),
-                Text('Current', style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18.0,
-                ),),
-            ],
+          const SizedBox(
+            width: 10,
+          ),
+          Container(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+            width: MediaQuery.of(context).size.width,
+            child: Row(
+              children: <Widget>[
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Name',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18.0,
+                    ),
+                  ),
+                ),
+                const Spacer(
+                  // width: 117,
+                  flex: 10,
+                ),
+                const Text(
+                  'Previous',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18.0,
+                  ),
+                ),
+                const Spacer(
+                    // width: 12,
+                    ),
+                const Text(
+                  'Current',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18.0,
+                  ),
+                ),
+                IconButton(
+                    onPressed: () {
+                      uploadBills(choosMenu);
+                    },
+                    icon: const Icon(Icons.upload)),
+              ],
+            ),
           ),
           const Divider(
             color: Colors.black,
@@ -154,7 +183,9 @@ class _OffilineReadingState extends State<OffilineReading> {
             indent: 0.0,
             endIndent: 10.0,
           ),
-          readingOfflineList(),
+          Container(
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+              child: readingOfflineList()),
         ],
       ),
     );
@@ -204,131 +235,421 @@ class _OffilineReadingState extends State<OffilineReading> {
   }
 
   Widget dropMenu() {
-   return Column(
-     children: [
-      Container(
-        width: 260,
-        height: 40,
-        child:  TextField(
-        decoration: InputDecoration(
-          suffixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15)
-          ),
-          labelText: 'Search'
-        ),
-      )),
-       DropdownButton(
-        value: valDropdowna,
-  items: _areas.map((map) => DropdownMenuItem(
-          child: Text('Bill: ${map.description} ',style: TextStyle(color: Colors.black),),
-          value: map.description,
-        ),
-  ).toList(), onChanged: (value) { 
-        setState(() {
-          choosMenu = value.toString();
-          valDropdowna = value.toString();
-        });
-       },
-),
-       DropdownButton(
-        value: valDropdown,
-  items: _bills.map((map) => DropdownMenuItem(
-          child: Text('Bill: ${map.month} ${map.year}',style: TextStyle(color: Colors.black),),
-          value: map.billingID,
-        ),
-  ).toList(), onChanged: (value) { 
-        setState(() {
-          choosMenu = value.toString();
-          getList(value.toString());
-          valDropdown = value.toString();
-        });
-       },
-),
-     ],
-   );
+    return Row(
+      children: [
+        Container(
+            padding: const EdgeInsets.fromLTRB(5, 20, 5, 10),
+            width: MediaQuery.of(context).size.width - 90,
+            height: 70,
+            child: TextField(
+              controller: _nameFieldController,
+              onChanged: (value) => onSearchTextChanged(value),
+              decoration: InputDecoration(
+                suffixIcon: const Icon(Icons.search),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                labelText: 'Search Name',
+              ),
+            )),
+        IconButton(
+            onPressed: () {
+              _displayFilterDialog(context);
+            },
+            icon: const Icon(Icons.open_in_browser)),
+      ],
+    );
   }
-  
-  Widget floatingButton() {
-    return const FloatingActionButton.extended(onPressed: null, label:  Text('Upload Billing'));
+
+  void onSearchTextChanged(String text) async {
+     _foundUsers = billsOffline;
+    List<MembersBilling> results = [];
+    if (text.isEmpty) {
+        results = _foundUsers;
+    } else {
+        results = _foundUsers
+          .where((user) =>
+              user.name.toLowerCase().contains(text.toLowerCase()))
+          .toList();
+    }
+    setState(() {
+      billsOffline = results;
+    });
+  }
+   void onSearchBrgyChanged(String text) async {
+    _foundUsers = billsOffline;
+    List<MembersBilling> results = [];
+    if(billsOffline.isEmpty){
+    if (text.isEmpty) {
+        results = _foundUsers;
+    } else {
+        results = _foundUsers
+          .where((user) =>
+              user.areaid.toLowerCase().contains(text.toLowerCase()))
+          .toList();
+    }
+    }else{
+      const AlertDialog(title: Text('Please Select Month of Bill'), );
+    }
+    setState(() {
+      billsOffline = results;
+    });
   }
 
   Widget readingOfflineList() {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height - 231,
-      child: ListView.builder(
-          shrinkWrap: false,
-          itemCount: billsOffline.length,
-          itemBuilder: (BuildContext context, int index) {
-            return GestureDetector(
-              onTap: (){
-                _displayReadingDialog(context, billsOffline[index].billMemId,);
-              },
-              child: Card(
-                color: billsOffline[index].status == 'upload' ? Colors.green.shade400.withOpacity(.5):Colors.blueAccent.shade100.withOpacity(.5),
-                child: Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
-                child: Row(children: [
-                  Text(billsOffline[index].name, 
-                  style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 18.0,
-                ),),
-                  Spacer(),
-                  Text(billsOffline[index].prev,
-                  style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 18.0,
-                ),),
-                 Spacer(),
-                  Text(billsOffline[index].reading,
-                  style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 18.0,
-                ),),
-                ]),),
-              ),
-            );
-          }),
+    return SingleChildScrollView(
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height - 342,
+          child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+              shrinkWrap: false,
+              itemCount: billsOffline.length,
+              itemBuilder: (BuildContext context, int index) {
+                return GestureDetector(
+                  onTap: () {
+                    _displayReadingDialog(
+                      context,
+                      billsOffline[index].billMemId,
+                    );
+                  },
+                  child: Container(
+                    color: billsOffline[index].status == 'upload'
+                        ? Colors.green.shade400.withOpacity(.5)
+                        : Colors.blueAccent.shade100.withOpacity(.2),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 10, 60, 10),
+                      child: Row(children: [
+                        Text(
+                          billsOffline[index].name,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 18.0,
+                          ),
+                        ),
+                        const Spacer(
+                          flex: 3,
+                        ),
+                        Text(
+                          billsOffline[index].prev,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 18.0,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          billsOffline[index].reading,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 18.0,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ]),
+                    ),
+                  ),
+                );
+              }),
+        ),
+      ),
     );
   }
 
   Future<void> _displayReadingDialog(BuildContext context, String id) async {
-   return showDialog(
-       context: context,
-       builder: (context) {
-         return AlertDialog(
-           title: const Text('Update Reading'),
-           content: TextField(
-             onChanged: (value) {
-               setState(() {
-                 readingText = value;
-               });
-             },
-             controller: _textFieldController,
-             decoration: InputDecoration(hintText: "Input reading"),
-           ),
-           actions: <Widget>[
-             FlatButton(
-               color: Colors.green,
-               textColor: Colors.white,
-               child: const Text('Save'),
-               onPressed: () {
-                 setState(() {
-                  UpdateItemBill(id);
-                   Navigator.pop(context);
-                 });
-               },
-             ),
-  
-           ],
-         );
-       });
- }
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Update Reading'),
+            content: TextField(
+              onChanged: (value) {
+                setState(() {
+                  readingText = value;
+                });
+              },
+              controller: _textFieldController,
+              decoration: const InputDecoration(hintText: "Input reading"),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.green,
+                textColor: Colors.white,
+                child: const Text('Save'),
+                onPressed: () {
+                  setState(() {
+                    UpdateItemBill(id);
+                    Navigator.pop(context);
+                  });
+                },
+              ),
+            ],
+          );
+        });
+  }
 
-   Future<int> UpdateItemBill(String id) async {
+  Future<void> _displayFilterDialog(BuildContext context) async {
+    // getArea();
+    return showModalBottomSheet<void>(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter newsetState) {
+            return Container(
+              child: Column(
+                children: [
+                  const SizedBox(height: 2), //SizedBox
+                  const Text(
+                    'Filter Reading',
+                    textAlign: TextAlign.start,
+                    style: TextStyle(fontSize: 17.0),
+                  ),
+                  const SizedBox(height: 2),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(5, 15, 5, 10),
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    width: MediaQuery.of(context).size.width - 40,
+                    height: 80,
+                    child: Column(
+                      children: [
+                        //Checkbox
+                        const SizedBox(
+                          height: 1,
+                        ),
+                        const Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text("Choose Barangay",
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                ))),
+                        Container(
+                          height: 35,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: Colors.black54,
+                              )),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              left: 4,
+                              right: 4,
+                            ),
+                            child:DropdownButton(
+                                    isExpanded: true,
+                                    underline: Container(),
+                                    alignment: Alignment.bottomRight,
+                                    elevation: 0,
+                                    borderRadius: BorderRadius.circular(5),
+                                    icon: const Icon(
+                                      Icons.keyboard_arrow_down,
+                                    ),
+                                    value: valDropdowna,
+                                    items: _areas
+                                        .map(
+                                          (map) => DropdownMenuItem(
+                                            child: Text(map.description,
+                                                style: const TextStyle(
+                                                    color: Colors.black),
+                                                textAlign: TextAlign.right),
+                                            value: map.id,
+                                          ),
+                                        )
+                                        .toList(),
+                                    onChanged: (value) {
+                                      newsetState(() {
+                                        if(billsOffline.isEmpty){
+                                         _dialogBuilder;
+                                          }else{
+                                        onSearchBrgyChanged(value.toString());
+                                        valDropdowna = value.toString();
+                                        setState(() {
+                                        valDropdowna = value.toString();
+                                      });
+                                          }
+                                      });
+                                    },
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    width: MediaQuery.of(context).size.width - 40,
+                    height: 80,
+                    child: Column(
+                      children: [
+                        const SizedBox(
+                          height: 1,
+                        ),
+                        const Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text("Month of Billing",
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                ))),
+                        Container(
+                          height: 35,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: Colors.black54,
+                              )),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              left: 4,
+                              right: 4,
+                            ),
+                            child: DropdownButton(
+                              underline: Container(),
+                              isExpanded: true,
+                              alignment: Alignment.bottomRight,
+                              elevation: 0,
+                              borderRadius: BorderRadius.circular(5),
+                              icon: const Icon(
+                                Icons.keyboard_arrow_down,
+                              ),
+                              value: valDropdown,
+                              items: _bills
+                                  .map(
+                                    (map) => DropdownMenuItem(
+                                      child: Text(
+                                          'Bill: ${map.month} ${map.year}',
+                                          style: const TextStyle(
+                                              color: Colors.black),
+                                          textAlign: TextAlign.right),
+                                      value: map.billingID,
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                newsetState(() {
+                                  choosMenu = value.toString();
+                                  getList(value.toString());
+                                  valDropdown = value.toString();
+                                });
+                                setState(() {
+                                  choosMenu = value.toString();
+                                  getList(value.toString());
+                                  valDropdown = value.toString();
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(5, 10, 5, 010),
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    width: MediaQuery.of(context).size.width - 40,
+                    height: 87,
+                    child: Column(
+                      children: [
+                        const Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text("Status of Reading",
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                ))),
+                        Row(
+                          children: <Widget>[
+                            /** Checkbox Widget **/
+                            Checkbox(
+                              value: value,
+                              onChanged: (bool? newvalue) {
+                                 newsetState(() {
+                                  value = newvalue!;
+                                });
+                              },
+                            ), //Checkbox
+                            const SizedBox(width: 2), //SizedBox
+                             Text( value ?
+                              'Read ' : 'Unread',
+                              style: TextStyle(fontSize: 17.0),
+                            ), //Text
+                          ], //<Widget>[]
+                        ),
+                      ],
+                    ),
+                  ),
+                  FlatButton(
+                    color: Colors.green,
+                    textColor: Colors.white,
+                    child: const Text('Close'),
+                    onPressed: () {
+                      setState(() {
+                        Navigator.pop(context);
+                      });
+                    },
+                  ),
+                  // FlatButton(
+                  //   color: Colors.green,
+                  //   textColor: Colors.white,
+                  //   child: const Text('Filter'),
+                  //   onPressed: () {
+                  //     setState(() {
+                  //       // UpdateItemBill(id);
+                  //       Navigator.pop(context);
+                  //     });
+                  //   },
+                  // ),
+                ],
+              ),
+            );
+          });
+        });
+  }
+   static Route<Object?> _dialogBuilder(
+      BuildContext context, Object? arguments) {
+    return DialogRoute<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('PIWAS READING'),
+          content: const Text('Please select monthly billing!'),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+      }
+
+  Future<int> UpdateItemBill(String id) async {
     String readVal = _textFieldController.text;
-    final result = await SqliteService.updateBilling(id,readVal);
+    final result = await SqliteService.updateBilling(id, readVal);
     print(result);
     getList(choosMenu);
     return result;
