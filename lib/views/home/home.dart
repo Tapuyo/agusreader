@@ -15,6 +15,7 @@ import '../../models/billing_models.dart';
 import '../../models/members_billing_model.dart';
 import '../../services/sqlite_service.dart';
 import '../billing/bill.dart';
+import '../billing/billed_list.dart';
 
 class MyHomePage extends StatefulWidget {
   _BillingPayDialog createState() => _BillingPayDialog();
@@ -83,9 +84,11 @@ class _BillingPayDialog extends State<MyHomePage>
                 onTap: () {
                   _toggleAnimation();
                 },
-                child: Scaffold(
-                  backgroundColor: kColorBlue,
-                  body: Padding(
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                  color: kColorBlue,
+                  child: Padding(
                     padding: const EdgeInsets.fromLTRB(0, 200, 30, 0),
                     child: SizedBox(
                         width: MediaQuery.of(context).size.width,
@@ -121,8 +124,17 @@ class _BillingPayDialog extends State<MyHomePage>
                             SizedBox(
                               height: 30,
                             ),
-                            Text('Print Bills',
-                                style: BluekTextStyleHeadline5white),
+                            GestureDetector(
+                              onTap: ()async{
+                                  setState(() {
+                                    showDownLoadinBtn = false;
+                                    menuChoose = 'printBills';
+                                  });
+                                  _toggleAnimation();
+                              },
+                              child: Text('Print Bills',
+                                  style: BluekTextStyleHeadline5white),
+                            ),
                             SizedBox(
                               height: 30,
                             ),
@@ -158,69 +170,62 @@ class _BillingPayDialog extends State<MyHomePage>
                     backgroundColor: Colors.white,
                     body: Stack(
                       children: [
-                        Expanded(
-                          // height: MediaQuery.of(context).size.height,
-                          // width: MediaQuery.of(context).size.width,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 40, 20, 0),
-                            child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        // ignore: prefer_const_literals_to_create_immutables
-                                        children: [
-                                          Text(
-                                            'Welcome',
-                                            style: kTextStyleHeadline5,
-                                          ),
-                                          SizedBox(
-                                            height: 12,
-                                          ),
-                                          Text('John', style: kTextStyleHeadline4)
-                                        ],
-                                      ),
-                                      Spacer(),
-                                      IconButton(
-                                        onPressed: () => _toggleAnimation(),
-                                        icon: AnimatedIcon(
-                                          icon: AnimatedIcons.menu_close,
-                                          progress: _animationController,
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 40, 20, 0),
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      // ignore: prefer_const_literals_to_create_immutables
+                                      children: [
+                                        Text(
+                                          'Welcome',
+                                          style: kTextStyleHeadline5,
                                         ),
+                                        SizedBox(
+                                          height: 12,
+                                        ),
+                                        Text('John', style: kTextStyleHeadline4)
+                                      ],
+                                    ),
+                                    Spacer(),
+                                    IconButton(
+                                      onPressed: () => _toggleAnimation(),
+                                      icon: AnimatedIcon(
+                                        icon: AnimatedIcons.menu_close,
+                                        progress: _animationController,
                                       ),
-                                    ],
-                                  ),
-                                  if(menuChoose == 'offlineReading')...[
-                                    OffilineReading(billID: docID,),
-                                  ]else if(menuChoose == 'billing')...[
-                                    BillingPage()
-                                  ]else...[
-                                    OffilineReading(billID: docID,),
-                                  ]
-                                  
-                                ]),
-                          ),
+                                    ),
+                                  ],
+                                ),
+                                if(menuChoose == 'offlineReading')...[
+                                  OffilineReading(billID: docID,),
+                                ]else if(menuChoose == 'pintBills')...[
+                                  BillingContentPage()
+                                ]else if(menuChoose == 'printBills')...[
+                                  BillingContentPage()
+                                ]
+                                
+                              ]),
                         ),
                         Align(
                           alignment: Alignment.bottomCenter,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                              child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    if (offline) ...[
-                                      openBills(context),
-                                    ] else ...[
-                                      liveBilling(context)
-                                    ]
-                                  ]),
-                            ),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  if (offline) ...[
+                                    openBills(context),
+                                  ] else ...[
+                                    liveBilling(context)
+                                  ]
+                                ]),
                           ),
                         )
                       ],
