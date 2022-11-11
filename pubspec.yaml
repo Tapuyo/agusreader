@@ -52,6 +52,10 @@ dependencies:
   intl: ^0.17.0
   firebase_auth: ^3.11.2
 
+  #printing
+  bluetooth_print: ^4.3.0
+  
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

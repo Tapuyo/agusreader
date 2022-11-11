@@ -29,6 +29,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.3"
+  bluetooth_print:
+    dependency: "direct main"
+    description:
+      name: bluetooth_print
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.3.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -268,6 +275,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.4"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.7.0"
   lints:
     dependency: transitive
     description:
@@ -359,6 +373,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.1"
+  rxdart:
+    dependency: transitive
+    description:
+      name: rxdart
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.27.5"
   sky_engine:
     dependency: transitive
     description: flutter

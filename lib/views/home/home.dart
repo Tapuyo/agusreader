@@ -13,6 +13,8 @@ import 'package:provider/provider.dart';
 import '../../models/billing_models.dart';
 import '../../models/members_billing_model.dart';
 import '../../services/sqlite_service.dart';
+import '../billing/bill.dart';
+import '../billing/billed_list.dart';
 
 class MyHomePage extends StatefulWidget {
   _BillingPayDialog createState() => _BillingPayDialog();
@@ -30,7 +32,7 @@ class _BillingPayDialog extends State<MyHomePage>
   late AnimationController _animationController;
   bool offline = true;
   bool showDownLoadinBtn = true;
-  
+  String menuChoose = 'offlineReading';
 
   @override
   void initState() {
@@ -71,158 +73,169 @@ class _BillingPayDialog extends State<MyHomePage>
   Widget build(BuildContext context) {
     final rightSlide = MediaQuery.of(context).size.width * -.5;
     return AnimatedBuilder(
-       animation: _animationController,
-       builder: (context, child) {
-         double slide = rightSlide * _animationController.value;
-         double scale = 1 - (_animationController.value * 0.3);
-         return Stack(
-           children: [
-             // Works as Drawer
-             GestureDetector(
-               onTap: () {
-                 _toggleAnimation();
-               },
-               child: Scaffold(
-                 backgroundColor: kColorBlue,
-                 body: Padding(
-                   padding: const EdgeInsets.fromLTRB(0, 200, 30, 0),
-                   child: SizedBox(
-                       width: MediaQuery.of(context).size.width,
-                       child: Column(
-                         crossAxisAlignment: CrossAxisAlignment.end,
-                         // ignore: prefer_const_literals_to_create_immutables
-                         children: [
-                           GestureDetector(
-                               onTap: () {
-                                 setState(() {
-                                   offline = !offline;
-                                 });
-                               },
-                               child: Text(
-                                   offline ? 'Online Mode' : 'Offline Mode',
-                                   style: BluekTextStyleHeadline5white)),
-                           SizedBox(
-                             height: 30,
-                           ),
-                           GestureDetector(
-                             onTap: ()async{
-                               MembersBilling bills = MembersBilling('1Zizfq8XMICrd4XeCPAJ','billMemId','name','reading','status','areaid','deateread','12','');
-        final result = await SqliteService.downloadReading(bills);
-        print(result);
-                             },
-                             child: Text('Reading',
-                                 style: BluekTextStyleHeadline5white),
-                           ),
-                           SizedBox(
-                             height: 30,
-                           ),
-                           GestureDetector(
-                             onTap: ()async{
-                               MembersBilling bills = MembersBilling('1Zizfq8XMICrd4XeCPAJ','billMemId','name','reading','status','areaid','deateread','12','');
-        final result = await SqliteService.downloadReading(bills);
-        print(result);
-                             },
-                             child: Text('Print Bills',
-                                 style: BluekTextStyleHeadline5white),
-                           ),
-                           SizedBox(
-                             height: 30,
-                           ),
-                           Text('Settings',
-                               style: BluekTextStyleHeadline5white),
-                           SizedBox(
-                             height: 30,
-                           ),
-                           Text('Help?', style: BluekTextStyleHeadline5white),
-                         ],
-                       )),
-                 ),
-               ),
-             ),
+        animation: _animationController,
+        builder: (context, child) {
+          double slide = rightSlide * _animationController.value;
+          double scale = 1 - (_animationController.value * 0.3);
+          return Stack(
+            children: [
+              // Works as Drawer
+              GestureDetector(
+                onTap: () {
+                  _toggleAnimation();
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                  color: kColorBlue,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 200, 30, 0),
+                    child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          // ignore: prefer_const_literals_to_create_immutables
+                          children: [
+                            GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    menuChoose = 'offlineReading';
+                                    offline = !offline;
+                                  });
+                                  _toggleAnimation();
+                                },
+                                child: Text(
+                                    offline ? 'Online Mode' : 'Offline Mode',
+                                    style: BluekTextStyleHeadline5white)),
+                            SizedBox(
+                              height: 30,
+                            ),
+                            GestureDetector(
+                              onTap: ()async{
+                                  setState(() {
+                                    showDownLoadinBtn = false;
+                                    menuChoose = 'billing';
+                                  });
+                                  _toggleAnimation();
+                              },
+                              child: Text('Reading',
+                                  style: BluekTextStyleHeadline5white),
+                            ),
+                            SizedBox(
+                              height: 30,
+                            ),
+                            GestureDetector(
+                              onTap: ()async{
+                                  setState(() {
+                                    showDownLoadinBtn = false;
+                                    menuChoose = 'printBills';
+                                  });
+                                  _toggleAnimation();
+                              },
+                              child: Text('Print Bills',
+                                  style: BluekTextStyleHeadline5white),
+                            ),
+                            SizedBox(
+                              height: 30,
+                            ),
+                            Text('Settings',
+                                style: BluekTextStyleHeadline5white),
+                            SizedBox(
+                              height: 30,
+                            ),
+                            Text('Help?', style: BluekTextStyleHeadline5white),
+                          ],
+                        )),
+                  ),
+                ),
+              ),
 
-             Transform(
-               transform: Matrix4.identity()
-                 ..translate(slide)
-                 ..scale(scale),
-               alignment: Alignment.center,
-               child: Container(
-                  decoration: BoxDecoration(
-                   borderRadius: BorderRadius.only(
-                       topRight: Radius.circular(10.0),
-                       topLeft: Radius.circular(10.0),
-                       bottomRight: Radius.circular(10.0)
-                       
-                       ),
-                       
-                   color: Colors.white,
-                 ),
-                 child: Scaffold(
-                   backgroundColor: Colors.white,
-                   body: Stack(
-                     children: [
-                       SizedBox(
-                         height: MediaQuery.of(context).size.height,
-                         width: MediaQuery.of(context).size.width,
-                         child: Padding(
-                           padding: const EdgeInsets.fromLTRB(20, 40, 20, 0),
-                           child: Column(
-                               mainAxisAlignment: MainAxisAlignment.start,
-                               children: [
-                                 Row(
-                                   children: [
-                                     Column(
-                                       crossAxisAlignment:
-                                           CrossAxisAlignment.start,
-                                       // ignore: prefer_const_literals_to_create_immutables
-                                       children: [
-                                         Text(
-                                           'Welcome',
-                                           style: kTextStyleHeadline5,
-                                         ),
-                                         Text('John', style: kTextStyleHeadline4)
-                                       ],
-                                     ),
-                                     Spacer(),
-                                     IconButton(
-                                       onPressed: () => _toggleAnimation(),
-                                       icon: AnimatedIcon(
-                                         icon: AnimatedIcons.menu_arrow,
-                                         progress: _animationController,
-                                       ),
-                                     ),
-                                   ],
-                                 ),
-                                 OffilineReading(billID: docID,),
-                               ]),
-                         ),
-                       ),
-                       Align(
-                         alignment: Alignment.bottomCenter,
-                         child: SizedBox(
-                           width: MediaQuery.of(context).size.width,
-                           child: Padding(
-                             padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                             child: Column(
-                                 mainAxisAlignment: MainAxisAlignment.end,
-                                 crossAxisAlignment: CrossAxisAlignment.center,
-                                 children: [
-                                   if (offline) ...[
-                                     openBills(context),
-                                   ] else ...[
-                                     liveBilling(context)
-                                   ]
-                                 ]),
-                           ),
-                         ),
-                       )
-                     ],
-                   ),
-                 ),
-               ),
-             )
-           ],
-         );
-       });
+              Transform(
+                transform: Matrix4.identity()
+                  ..translate(slide)
+                  ..scale(scale),
+                alignment: Alignment.center,
+                child: Container(
+                   decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(10.0),
+                        topLeft: Radius.circular(10.0),
+                        bottomRight: Radius.circular(10.0)
+                        
+                        ),
+                        
+                    color: Colors.white,
+                  ),
+                  child: Scaffold(
+                    backgroundColor: Colors.white,
+                    body: Stack(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 40, 20, 0),
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      // ignore: prefer_const_literals_to_create_immutables
+                                      children: [
+                                        Text(
+                                          'Welcome',
+                                          style: kTextStyleHeadline5,
+                                        ),
+                                        SizedBox(
+                                          height: 12,
+                                        ),
+                                        Text('John', style: kTextStyleHeadline4)
+                                      ],
+                                    ),
+                                    Spacer(),
+                                    IconButton(
+                                      onPressed: () => _toggleAnimation(),
+                                      icon: AnimatedIcon(
+                                        icon: AnimatedIcons.menu_close,
+                                        progress: _animationController,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if(menuChoose == 'offlineReading')...[
+                                  OffilineReading(billID: docID,),
+                                ]else if(menuChoose == 'pintBills')...[
+                                  BillingContentPage()
+                                ]else if(menuChoose == 'printBills')...[
+                                  BillingContentPage()
+                                ]
+                                
+                              ]),
+                        ),
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  if (offline) ...[
+                                    openBills(context),
+                                  ] else ...[
+                                    liveBilling(context)
+                                  ]
+                                ]),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            ],
+          );
+        });
   }
 
   Future<List<Billing>> getBilling() async {
@@ -327,7 +340,7 @@ class _BillingPayDialog extends State<MyHomePage>
                   itemBuilder: (context, index) {
                     checkBillingExist(snapshot.data[index].billingID);
                     return Visibility(
-                      visible: showDownLoadinBtn,
+                      visible: menuChoose == 'offlineReading' ? showDownLoadinBtn:false,
                       child: MenuButton(
                           isSelect: true,
                           onPressed: () async{

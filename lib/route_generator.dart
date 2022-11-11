@@ -1,6 +1,7 @@
 
 import 'package:agus_reader/login/loginpage.dart';
 import 'package:agus_reader/sample/sample.dart';
+import 'package:agus_reader/views/billing/bill.dart';
 import 'package:agus_reader/views/home/home.dart';
 import 'package:agus_reader/routes.dart';
 import 'package:agus_reader/splash.dart';
