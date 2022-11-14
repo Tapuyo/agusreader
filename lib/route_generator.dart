@@ -16,8 +16,8 @@ class RouteGenerator {
       case Routes.splash:
         return CupertinoPageRoute(builder: (_) => const SplashScreen());
       case Routes.home:
-        return CupertinoPageRoute(builder: (_) => const MyHomePage());
-        // return CupertinoPageRoute(builder: (_) =>  const SignIn());
+        // return CupertinoPageRoute(builder: (_) => const MyHomePage());
+        return CupertinoPageRoute(builder: (_) =>  const SignIn());
 
       default:
         return _errorRoute();

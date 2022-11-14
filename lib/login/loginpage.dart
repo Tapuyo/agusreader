@@ -1,7 +1,10 @@
-
+import 'package:agus_reader/main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:agus_reader/login/auth.dart';
+import 'package:agus_reader/models/reader_model';
+import 'package:agus_reader/services/sqlite_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,12 +33,53 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+  @override
+  void initState() {
+    super.initState();
+    getReader();
+  }
+
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
   String email = '';
-String password = '';
-String error = '';
-final AuthService _auth = AuthService();
+  String password = '';
+  String error = '';
+  String readerID = '';
+
+  List<Reader> reader = [];
+
+  Future<List<Reader>> getReader() async {
+    final ConnectivityResult result = await Connectivity().checkConnectivity();
+    if (result != ConnectivityResult.none) {
+      await FirebaseFirestore.instance
+          .collection('reader')
+          .get()
+          .then((QuerySnapshot querySnapshot) => {
+                querySnapshot.docs.forEach((doc) async {
+                  debugPrint(doc.data().toString());
+                  setState(() {
+                    readerID = doc.id;
+                  });
+                  await downloadReader(doc.id, doc['address'], doc['contact'],
+                      doc['firstname'], doc['lastname'], doc['mname']);
+                })
+              });
+    } else {
+      print('Please check your connection');
+    }
+    return reader;
+  }
+
+  Future<int> downloadReader(String id, String address, String contact,
+      String firstname, String lastname, String mname) async {
+    Reader reader = Reader(id, address, contact, firstname, lastname, mname);
+    print(reader.toString());
+    final result = await SqliteService.downloadReader(reader);
+
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -52,7 +96,7 @@ final AuthService _auth = AuthService();
                 child: Column(
                   children: [
                     Padding(
-                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -70,9 +114,9 @@ final AuthService _auth = AuthService();
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                       child: Row(
-                         mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: const [
-                           Text(
+                          Text(
                             'Agus App',
                             style: TextStyle(
                                 color: Colors.black54,
@@ -111,13 +155,13 @@ final AuthService _auth = AuthService();
                           ),
                           labelText: 'Enter email',
                         ),
-                        validator: (val) => val!.isEmpty ? 'Enter an email' : null,
-                onChanged: (val){
-                  setState(() {
-                    email = val;
-                  });
-
-                },
+                        validator: (val) =>
+                            val!.isEmpty ? 'Enter an email' : null,
+                        onChanged: (val) {
+                          setState(() {
+                            email = val;
+                          });
+                        },
                       ),
                     ),
                     Padding(
@@ -131,12 +175,14 @@ final AuthService _auth = AuthService();
                           ),
                           labelText: 'Password',
                         ),
-                         validator: (val) => val!.length < 6 ? 'Enter a 6+ valid password' : null,
-                onChanged: (val){
-                  setState(() {
-                    password = val;
-                  });
-                },
+                        validator: (val) => val!.length < 6
+                            ? 'Enter a 6+ valid password'
+                            : null,
+                        onChanged: (val) {
+                          setState(() {
+                            password = val;
+                          });
+                        },
                       ),
                     ),
                     Container(
@@ -167,7 +213,7 @@ final AuthService _auth = AuthService();
                           ), // Background color
                         ),
                         onPressed: () async {
-                          dynamic result = await _auth.signinwEmailandPassword(email, password);
+                          checkAreaExist(email);
                         },
                         child: const Text(
                           'Sign In',
@@ -203,5 +249,16 @@ final AuthService _auth = AuthService();
             ],
           ),
         ));
+  }
+
+  Future<void> checkAreaExist(String billID) async {
+    var res = await SqliteService.checkReaderExist(billID);
+    setState(() {
+      if (res) {
+        print('user found');
+      } else {
+        print('not found');
+      }
+    });
   }
 }

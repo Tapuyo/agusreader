@@ -1,0 +1,16 @@
+class Reader{
+  final String id;
+  final String address;
+  final String contact;
+  final String firstname;
+  final String lastname;
+  final String mname;
+
+  Reader( this.id, this.address, this.contact, this.firstname, this.lastname, this.mname);
+Reader.fromMap(Map<String, dynamic> item): 
+    id=item["id"],address=item["address"], contact= item["contact"], firstname= item["firstname"], lastname= item["lastname"], mname= item["mname"];
+  
+  Map<String, Object> toMap(){
+    return {'id':id, 'address':address, 'contact':contact, 'firstname':firstname, 'lastname':lastname, 'mname':mname};
+  }
+}

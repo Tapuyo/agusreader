@@ -1,5 +1,6 @@
 import 'package:agus_reader/models/area_model.dart';
 import 'package:agus_reader/models/billing_models.dart';
+import 'package:agus_reader/models/reader_model';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -15,6 +16,7 @@ class SqliteService {
          await database.execute( "CREATE TABLE Billing(id INTEGER PRIMARY KEY AUTOINCREMENT,  billingID TEXT, month TEXT, year TEXT, status TEXT, creator TEXT)",);
          await database.execute( "CREATE TABLE MembersBillings(id INTEGER PRIMARY KEY AUTOINCREMENT,  billingID TEXT, billMemId TEXT, name TEXT, reading TEXT, status TEXT, areaid TEXT, deateread TEXT, prev TEXT, connectionId TEXT)",);
          await database.execute( "CREATE TABLE Areamap(id TEXT,code TEXT, description TEXT, name TEXT, status TEXT)",);
+         await database.execute( "CREATE TABLE Readermap(id TEXT,address TEXT, contact TEXT, firstname TEXT, lastname TEXT, mname TEXT)",);
 
      },
      version: 1,
@@ -43,6 +45,18 @@ class SqliteService {
       return false;
     }
   }
+
+static Future<bool> checkReaderExist(String id) async {
+    final db = await initizateDb();
+    final List<Map<String, Object?>> queryResult = 
+      await db.query('Readermap',where: 'firstname = ?', whereArgs: [id]);
+
+    if(queryResult.isNotEmpty){
+      return true;
+    }else{
+      return false;
+    }
+}
   // static Future<Database> initizateDbarea() async {
   //   String path = await getDatabasesPath();
     
@@ -64,6 +78,7 @@ class SqliteService {
     print(queryResult.length);
     return queryResult.map((e) => MembersBilling.fromMap(e)).toList();
   }
+
    static Future<List<Area>> getAreas() async {
     final db = await initizateDb();
     final List<Map<String, Object?>> queryResult = 
@@ -110,6 +125,21 @@ static Future<int> downloadArea(Area areamap) async {
     }
     final id = await db.insert(
       'Areamap', areamap.toMap(), 
+      conflictAlgorithm: ConflictAlgorithm.replace);
+    print('download result $id');
+    return id;
+   }
+
+   static Future<int> downloadReader(Reader readermap) async {
+    print('im here');
+    final Database db = await initizateDb();
+    try {
+       await db.delete("Readermap",);
+    } catch (err) {
+      debugPrint("Something went wrong when deleting an item: $err");
+    }
+    final id = await db.insert(
+      'Readermap', readermap.toMap(), 
       conflictAlgorithm: ConflictAlgorithm.replace);
     print('download result $id');
     return id;

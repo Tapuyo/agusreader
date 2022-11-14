@@ -1,5 +1,7 @@
 // ignore_for_file: sort_child_properties_last
 
+import 'dart:io';
+
 import 'package:agus_reader/models/area_model.dart';
 import 'package:agus_reader/models/billing_models.dart';
 import 'package:agus_reader/services/sqlite_service.dart';
@@ -41,10 +43,10 @@ List<MembersBilling> _foundUsers = [];
 
   String? valDropdown;
   String? valDropdowna;
+  bool valuea = false;
   bool value = false;
   bool all = false;
 
-   ConnectivityResult? _connectivityResult;
   @override
   void initState() {
     super.initState();
@@ -52,12 +54,7 @@ List<MembersBilling> _foundUsers = [];
     getList(widget.billID);
     getArea();
   }
-Future<void> _checkConnectivityState() async {
-    final ConnectivityResult result = await Connectivity().checkConnectivity();
-    setState(() {
-      _connectivityResult = result;
-    });
-  }
+
   getList(String billID) async {
     choosMenu = billID;
     billsOffline.clear();
@@ -66,14 +63,9 @@ Future<void> _checkConnectivityState() async {
   }
 
   getArea() async {
-   await _checkConnectivityState();
-    if(_connectivityResult == ConnectivityResult.wifi || _connectivityResult == ConnectivityResult.mobile ){
-      print('Connected');
     _areas.clear();
     _areas = await SqliteService.getAreas();
-    }else{
-      print('Please check your connection');
-    }
+    
   }
 
   getMenuBills() async {
@@ -85,10 +77,22 @@ Future<void> _checkConnectivityState() async {
 
   uploadBills(String billID) async {
     final res = await SqliteService.getMemberBills(billID);
+    List<MembersBilling> temp = [];
+    temp = res
+          .where((user) =>
+              user.reading.contains('0'))
+          .toList();
+    print(temp.length);
+    if(temp.isEmpty){
     for (var bill in res) {
+      print(temp.toString());
       var totalC = double.parse(bill.reading) - double.parse(bill.prev);
       updateReadingMember(
           bill.billMemId, bill.reading, totalC, bill.connectionId);
+    }
+    }else{
+      //TODO alert dialog display
+      print('Please check members reading!');
     }
   }
 
@@ -290,19 +294,22 @@ Future<void> _checkConnectivityState() async {
       billsOffline = results;
     });
   }
-  void onStatusChanged(bool text) async {
+  void onStatusUnreadChanged(bool text) async {
     List<MembersBilling> results = [];
-    if (text == false) {
         results = _foundUsers
           .where((user) =>
               user.reading.toString() == '0')
           .toList();
-    } else {
+    setState(() {
+      billsOffline = results;
+    });
+  }
+  void onStatusReadChanged(bool text) async {
+    List<MembersBilling> results = [];
         results = _foundUsers
           .where((user) =>
               user.reading.toString() != '0')
           .toList();
-    }
     setState(() {
       billsOffline = results;
     });
@@ -618,19 +625,35 @@ Future<void> _checkConnectivityState() async {
                           children: <Widget>[
                             /** Checkbox Widget **/
                             Checkbox(
-                              value: value,
+                              value: valuea,
                               onChanged: (bool? newvalue) {
                                  newsetState(() {
-                                  onStatusChanged(newvalue!);
-                                  value = newvalue;
+                                  onStatusUnreadChanged(newvalue!);
+                                  valuea = newvalue;
                                   all = false;
+                                  value = false;
 
                                 });
                               },
                             ), //Checkbox//SizedBox
-                             Text( value ?
-                              'Read ' : 'Unread',
-                              style: const TextStyle(fontSize: 17.0),
+                             const Text( 'Unread',
+                              style:  TextStyle(fontSize: 17.0),
+                            ), //Text
+                           const SizedBox( width: 3,),
+                            Checkbox(
+                              value: value,
+                              onChanged: (bool? newvalue) {
+                                 newsetState(() {
+                                  onStatusReadChanged(newvalue!);
+                                  value = newvalue;
+                                  all = false;
+                                  valuea = false;
+
+                                });
+                              },
+                            ), //Checkbox//SizedBox
+                           const  Text( 'Read',
+                              style:  TextStyle(fontSize: 17.0),
                             ), //Text
                            const SizedBox( width: 3,),
                             Checkbox(
@@ -640,6 +663,7 @@ Future<void> _checkConnectivityState() async {
                                   onAllChanged();
                                   all = newvalueme!;
                                   value = false;
+                                  valuea = false;
 
 
                                 });

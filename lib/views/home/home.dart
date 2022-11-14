@@ -1,12 +1,12 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:agus_reader/constants/constant.dart';
-import 'package:agus_reader/login/auth.dart';
 import 'package:agus_reader/models/area_model.dart';
 import 'package:agus_reader/models/user_model.dart';
 import 'package:agus_reader/utils/custom_menu_button.dart';
 import 'package:agus_reader/views/home/offline_reading/offline_reading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -259,6 +259,8 @@ class _BillingPayDialog extends State<MyHomePage>
     return bills;
   }
   Future<List<Area>> getAreas() async {
+    final ConnectivityResult result = await Connectivity().checkConnectivity();
+    if(result != ConnectivityResult.none){
     await FirebaseFirestore.instance
         .collection('area')
         .get()
@@ -272,6 +274,9 @@ class _BillingPayDialog extends State<MyHomePage>
                       doc['description'], doc['name'], doc['status']);
                 })
               });
+              }else{
+      print('Please check your connection');
+    }
     return areas;
   }
 
