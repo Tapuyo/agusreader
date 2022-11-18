@@ -1,4 +1,6 @@
-import 'package:agus_reader/main.dart';
+import 'package:flutter/src/foundation/key.dart';
+import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -6,33 +8,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:agus_reader/models/reader_model';
 import 'package:agus_reader/services/sqlite_service.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(const SignIn());
-}
-
-class SignIn extends StatelessWidget {
+class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: MyStatefulWidget(),
-      ),
-    );
-  }
+  State<SignIn> createState() => _SignInState();
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
-
-  @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-}
-
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _SignInState extends State<SignIn> {
   @override
   void initState() {
     super.initState();
@@ -58,13 +39,13 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           .then((QuerySnapshot querySnapshot) => {
                 querySnapshot.docs.forEach((doc) async {
                   debugPrint(doc.data().toString());
-                  setState(() {
-                    readerID = doc.id;
-                  });
+                  print(doc.id);
+                  
                   await downloadReader(doc.id, doc['address'], doc['contact'],
-                      doc['firstname'], doc['lastname'], doc['mname']);
+                      doc['firstName'], doc['lastName'], doc['middleInitName']);
                 })
               });
+      print('download complete');
     } else {
       print('Please check your connection');
     }
@@ -74,9 +55,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   Future<int> downloadReader(String id, String address, String contact,
       String firstname, String lastname, String mname) async {
     Reader reader = Reader(id, address, contact, firstname, lastname, mname);
-    print(reader.toString());
-    final result = await SqliteService.downloadReader(reader);
-
+    final result = await SqliteService.downloadUser(reader);
+    print(result.toString());
     return result;
   }
 

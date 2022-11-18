@@ -130,7 +130,7 @@ static Future<int> downloadArea(Area areamap) async {
     return id;
    }
 
-   static Future<int> downloadReader(Reader readermap) async {
+   static Future<int> downloadUser(Reader readermap) async {
     print('im here');
     final Database db = await initizateDb();
     try {

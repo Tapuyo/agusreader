@@ -1,5 +1,5 @@
 
-import 'package:agus_reader/login/loginpage.dart';
+import 'package:agus_reader/login/login.dart';
 import 'package:agus_reader/sample/sample.dart';
 import 'package:agus_reader/views/billing/bill.dart';
 import 'package:agus_reader/views/home/home.dart';
@@ -16,8 +16,8 @@ class RouteGenerator {
       case Routes.splash:
         return CupertinoPageRoute(builder: (_) => const SplashScreen());
       case Routes.home:
-        // return CupertinoPageRoute(builder: (_) => const MyHomePage());
-        return CupertinoPageRoute(builder: (_) =>  const SignIn());
+        return CupertinoPageRoute(builder: (_) => const MyHomePage());
+        // return CupertinoPageRoute(builder: (_) =>  const SignIn());
 
       default:
         return _errorRoute();

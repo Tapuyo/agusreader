@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../models/members_billing_model.dart';
@@ -77,23 +78,24 @@ List<MembersBilling> _foundUsers = [];
 
   uploadBills(String billID) async {
     final res = await SqliteService.getMemberBills(billID);
-    List<MembersBilling> temp = [];
-    temp = res
-          .where((user) =>
-              user.reading.contains('0'))
-          .toList();
-    print(temp.length);
-    if(temp.isEmpty){
+    // List<MembersBilling> temp = [];
+    // temp = res
+    //       .where((user) =>
+    //           user.reading.contains('0'))
+    //       .toList();
+    // print(temp.length);
+    // if(temp.isEmpty){
     for (var bill in res) {
-      print(temp.toString());
+      // print(temp.toString());
       var totalC = double.parse(bill.reading) - double.parse(bill.prev);
-      updateReadingMember(
+      updateReadingMember1(
           bill.billMemId, bill.reading, totalC, bill.connectionId);
     }
-    }else{
-      //TODO alert dialog display
-      print('Please check members reading!');
-    }
+    print('Reading Uploaded');
+    // }else{
+    //   //TODO alert dialog display
+    //   print('Please check members reading!');
+    // }
   }
 
   Future<void> updateReadingMember(String id, String currentReading,
@@ -101,7 +103,7 @@ List<MembersBilling> _foundUsers = [];
     double totalPrice = await getTotalBill(connectionId, totalCubic);
     FirebaseFirestore.instance.collection('membersBilling').doc(id).update({
       'currentReading': double.parse(currentReading),
-      'totalCubic': totalCubic,
+      'totalCubic': totalCubic, 
       'billingPrice': totalPrice,
       'flatRatePrice': 0,
       'flatRate': '',
@@ -110,6 +112,64 @@ List<MembersBilling> _foundUsers = [];
       await SqliteService.updateBillingStatus(id);
     });
   }
+  Future<void> updateReadingMember1(String id, String currentReading,
+      double totalCubic, String connectionId) async {
+    bool checkPrice = await checkPriceValue(id);
+
+    if(checkPrice){
+    double totalPrice = await getTotalBill(connectionId, totalCubic);
+    var collection = FirebaseFirestore.instance.collection('membersBilling').doc(id);
+    collection.update({
+      'currentReading': double.parse(currentReading),
+      'totalCubic': totalCubic, 
+      'billingPrice': totalPrice,
+      'flatRatePrice': 0,
+      'flatRate': '',
+      'dateRead': DateTime.now()
+    }).then((value) async {
+      await SqliteService.updateBillingStatus(id);
+    });
+      }else{
+        print('not upload');
+      }
+  }
+
+  Future<bool> checkPriceValue(String docid)async{
+    bool res = false;
+    List months =
+['January', 'February', 'March', 'April', 'May','June','July','August','September','October','November','December'];
+
+     var formatter = new DateFormat('MM'); 
+     var formatter1 = new DateFormat('yyyy'); 
+     var month = formatter. format(DateTime.now());
+     String year = formatter1. format(DateTime.now());
+     String currentmonth = months[int.parse(month)-1];
+     print('$currentmonth, $year ');
+
+    try{
+       await FirebaseFirestore.instance
+        .collection('membersBilling')
+        .get()
+        .then((QuerySnapshot querySnapshot) => {
+              querySnapshot.docs.forEach((doc) async {
+                if(doc.id == docid){
+                    if(doc['billingPrice'] > 0 && doc['month'] == currentmonth && doc['year'] == year){
+                      res = true;
+                    }else{
+                      res = false;
+                    }
+                }
+          })
+        });
+
+    }catch(e){
+      return false;
+    }
+
+    return res;
+  }
+
+
 
   Future<double> getTotalBill(String connectionId, double totalCubic) async {
     double totalBill = 0;
@@ -404,8 +464,6 @@ List<MembersBilling> _foundUsers = [];
     );
   }
 
-  
-
   Future<void> _displayReadingDialog(BuildContext context, String id) async {
     return showDialog(
         context: context,
@@ -439,7 +497,6 @@ List<MembersBilling> _foundUsers = [];
   }
 
   Future<void> _displayFilterDialog(BuildContext context) async {
-    // getArea();
     return showModalBottomSheet<void>(
         context: context,
         builder: (context) {
@@ -729,6 +786,7 @@ List<MembersBilling> _foundUsers = [];
       }
 
   Future<int> UpdateItemBill(String id) async {
+    print(id);
     String readVal = _textFieldController.text;
     final result = await SqliteService.updateBilling(id, readVal);
     print(result);
