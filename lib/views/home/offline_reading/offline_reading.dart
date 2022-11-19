@@ -421,43 +421,56 @@ List<MembersBilling> _foundUsers = [];
                       billsOffline[index].billMemId,
                     );
                   },
-                  child: Container(
-                    color: billsOffline[index].status == 'upload'
-                        ? Colors.green.shade400.withOpacity(.5)
-                        : Colors.blueAccent.shade100.withOpacity(.2),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 10, 60, 10),
-                      child: Row(children: [
-                        Text(
-                          billsOffline[index].name,
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 18.0,
-                          ),
+                  child: Column(
+                    children: [
+                      Container(
+                        color: billsOffline[index].status == 'upload'
+                            ? Colors.green.shade400.withOpacity(.5)
+                            : Colors.blueAccent.shade100.withOpacity(.1),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 10, 60, 10),
+                          child: Row(children: [
+                            Text(
+                              billsOffline[index].name,
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 18.0,
+                              ),
+                            ),
+                            const Spacer(
+                              flex: 3,
+                            ),
+                            Text(
+                              billsOffline[index].prev,
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 18.0,
+                              ),
+                            ),
+                            const Spacer(),
+                            Text(
+                              billsOffline[index].reading,
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 18.0,
+                              ),
+                              textAlign: TextAlign.left,
+                            ),
+                          ]),
                         ),
-                        const Spacer(
-                          flex: 3,
-                        ),
-                        Text(
-                          billsOffline[index].prev,
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 18.0,
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          billsOffline[index].reading,
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 18.0,
-                          ),
-                          textAlign: TextAlign.left,
-                        ),
-                      ]),
-                    ),
+                      ),
+                      const Divider(
+            color: Colors.grey,
+            height: 0.0,
+            thickness: 1,
+            indent: 0.0,
+            endIndent: 10.0,
+          ),
+                    ],
                   ),
+                  
                 );
+                
               }),
         ),
       ),
@@ -480,13 +493,12 @@ List<MembersBilling> _foundUsers = [];
               decoration: const InputDecoration(hintText: "Input reading"),
             ),
             actions: <Widget>[
-              FlatButton(
-                color: Colors.green,
-                textColor: Colors.white,
+              TextButton(
                 child: const Text('Save'),
                 onPressed: () {
                   setState(() {
                     UpdateItemBill(id);
+                    _textFieldController.clear();
                     Navigator.pop(context);
                   });
                 },
@@ -734,9 +746,7 @@ List<MembersBilling> _foundUsers = [];
                       ],
                     ),
                   ),
-                  FlatButton(
-                    color: Colors.green,
-                    textColor: Colors.white,
+                  TextButton(
                     child: const Text('Close'),
                     onPressed: () {
                       setState(() {
